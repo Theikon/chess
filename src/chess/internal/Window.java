@@ -2,12 +2,15 @@ package chess.internal;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.channels.Pipe;
 import java.util.function.Function;
 
-public class Window extends WindowAdapter {
+public class Window extends KeyAdapter {
 
     private static Window CURRENT = null;
 
@@ -57,31 +60,25 @@ public class Window extends WindowAdapter {
 
     private final Renderer renderer;
 
+    private final StringBuilder data;
+
     private Window() {
         assert EventQueue.isDispatchThread() : "!EventQueue.isDispatchThread()";
         this.peer = new JFrame("Chess");
         this.renderer = new Renderer();
+        this.data = new StringBuilder(16);
         this.peer.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         final Dimension maximum = GraphicsEnvironment.getLocalGraphicsEnvironment()
                 .getMaximumWindowBounds()
                 .getSize();
-        final Dimension minimum =
+        final Dimension size =
                 new Dimension(Math.min(768, maximum.width), Math.min(576, maximum.height));
-        final Dimension size;
-        if (JFrame.MAXIMIZED_BOTH == Vault.getInt("window" + ".maximized", JFrame.NORMAL)) {
-            size = minimum;
-            this.peer.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        } else {
-            size = new Dimension(
-                    Math.min(Math.abs(Vault.getInt("window.width", minimum.width)), maximum.width),
-                    Math.min(Math.abs(Vault.getInt("window.height", minimum.height)), maximum.height));
-        }
         this.peer.setSize(size);
-        this.peer.setMinimumSize(minimum);
+        this.peer.setMinimumSize(size);
         this.peer.setLocationRelativeTo(null);
         this.peer.add(this.renderer);
-        this.peer.setAlwaysOnTop(Boolean.parseBoolean(Vault.get("window.alwaysOnTop", "true")));
-        this.peer.addWindowListener(this);
+        this.peer.setAlwaysOnTop(true);
+        this.peer.addKeyListener(this);
     }
 
     public Renderer getRenderer() {
@@ -170,13 +167,24 @@ public class Window extends WindowAdapter {
     }
 
     @Override
-    public void windowClosing(final WindowEvent event) {
+    public void keyTyped(final KeyEvent event) {
         assert event != null : "event == null";
-        Vault.put("window.width", String.valueOf(this.peer.getWidth()));
-        Vault.put("window.height", String.valueOf(this.peer.getHeight()));
-        Vault.put("window.maximized", String.valueOf(this.peer.getExtendedState()
-                & JFrame.MAXIMIZED_BOTH));
-        Vault.put("window.alwaysOnTop", String.valueOf(this.peer.isAlwaysOnTop()));
-        Vault.save();
+        final char ch = event.getKeyChar();
+        if (ch == '\b' && this.data.length() > 0) {
+            this.data.deleteCharAt(this.data.length() - 1);
+            this.renderer.repaint();
+        } else if (ch == '\n') {
+            this.data.append('\n');
+            Pipeline.send(this.data.toString());
+            this.data.delete(0, this.data.length());
+            this.renderer.repaint();
+        } else if (Character.isLetterOrDigit(ch)) {
+            this.data.append(ch);
+            this.renderer.repaint();
+        } else if (Character.isWhitespace(ch)) {
+            this.data.append(' ');
+            this.renderer.repaint();
+        }
+        this.renderer.update("> " + this.data + " ");
     }
 }

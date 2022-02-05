@@ -6,7 +6,9 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.geom.Rectangle2D;
 
 public class Renderer extends JPanel {
 
@@ -16,12 +18,21 @@ public class Renderer extends JPanel {
 
     private final Board board;
 
+    private String desc;
+
     public Renderer() {
         super(null, true);
         assert EventQueue.isDispatchThread() : "!EventQueue.isDispatchThread()";
         this.board = new Board(new String[Board.SIZE][Board.SIZE]);
+        this.desc = ">  ";
         this.setBackground(BACKGROUND);
         this.setFont(FONT);
+    }
+
+    public void update(final String desc) {
+        assert desc != null : "desc == null";
+        assert EventQueue.isDispatchThread() : "!EventQueue.isDispatchThread()";
+        this.desc = desc;
     }
 
     @Override
@@ -57,10 +68,16 @@ public class Renderer extends JPanel {
                 graphics.setPaint(even ? light : dark);
                 graphics.fillRect(x, y, length, length);
                 graphics.setPaint(even ? dark : light);
-                graphics.drawString((" " + i + "," + j).intern(), x, y +  graphics.getFontMetrics().getHeight());
+                graphics.drawString((" " + i + "," + j).intern(), x, y + graphics.getFontMetrics().getHeight());
                 graphics.drawImage(square.icon, x, y, length, length, null);
             }
         }
+        final int fW = graphics.getFontMetrics().stringWidth(this.desc);
+        final int fH = graphics.getFontMetrics().getHeight();
+        graphics.setPaint(Color.RED);
+        graphics.fillRect(8, 8, fW, fH);
+        graphics.setPaint(Color.WHITE);
+        graphics.drawString(this.desc, 8, 4 + fH);
     }
 
     public Board getBoard() {

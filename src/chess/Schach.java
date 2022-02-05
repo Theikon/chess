@@ -1,6 +1,7 @@
 package chess;
 
 import chess.internal.Board;
+import chess.internal.Pipeline;
 import chess.internal.Window;
 
 import javax.swing.JFrame;
@@ -27,6 +28,7 @@ public class Schach implements AutoCloseable {
 
     static {
         initialized = false;
+        Pipeline.initialize();
     }
 
     /**
@@ -105,8 +107,7 @@ public class Schach implements AutoCloseable {
                             peer.setVisible(true);
                         }
                     } catch (final IllegalArgumentException ex) {
-                        System.err.println("Das Schachbrett konnte wegen eines Fehlers"
-                                + " nicht aktualisiert werden.");
+                        System.err.println("Das Schachbrett konnte wegen eines Fehlers nicht aktualisiert werden.");
                     }
                 });
                 try {
