@@ -1,9 +1,9 @@
-# just-chess
+# chess
 A graphical chess environment for learning Java.
 
 ## Getting started
 
-The goal of this project was to design a lightweight library for people who just started using Java. As such, showing the standard chess position is possible with a mere three lines of code:
+The goal of this project was to design a lightweight library for Java beginners. As such, showing the standard chess position is possible with a mere three lines of code:
 
 ```java
 String[][] brett = new String[8][8];
@@ -11,11 +11,11 @@ Schach schach = new Schach(brett);
 schach.zeige(brett);
 ```
 
-Please note that this library does not serve as an implementation of chess, rather only as a modifiable chess board. This means that no rules and moves are programmed into the library - it is up to the developer to implement these accordingly.
+Please note that this library does not provide a complete implementation of chess. No rules and moves are programmed into it.
 
 ![Screenshot](https://user-images.githubusercontent.com/31321459/137604378-c849608a-44f5-4ee3-9c38-41a717aabeb5.png)
 
-The following code snippet is a showcase of all the features available within the library:
+The following code snippet demonstrates all features available within the library:
 
 ```java
 String[][] brett = new String[8][8];
